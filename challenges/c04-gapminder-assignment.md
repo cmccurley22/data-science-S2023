@@ -211,7 +211,7 @@ gapminder %>%
 - Oceania’s gdpPerCap are very similar, around 10000
 - The gdpPerCap in Africa were all pretty low, less than 5000
 - Asia’s gdpPerCap were all less than 10000 besides the outlier, the
-  average was only a bit higher than Africa’s
+  median was only a bit higher than Africa’s
 - the America’s gdpPerCap also has a couple outliers above 10000
 
 **Difficulties & Approaches**:
@@ -313,7 +313,7 @@ gapminder %>%
 **Observations**:
 
 - Kuwait is an outlier in both years
-- All of the countries’ mean gdpPercap increased
+- All of the countries’ median gdpPercap increased
 - There are still a few points in the boxplot from the Americas that
   aren’t counted as outliers by the scale I used
 - The Oceania data is still generally pretty hard to read (fewer
