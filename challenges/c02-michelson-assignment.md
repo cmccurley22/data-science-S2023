@@ -331,9 +331,11 @@ df_q2 %>%
 
 **Observations**: Similarities - The dates of the min and max
 measurements of the velocities generally tend to line up - Overall, both
-follow a similar pattern in terms of when the values are lower/higher
-Differences - The simulated data consistently has higher velocities than
-Michelson’s real data
+follow a similar pattern in terms of when the values are lower/higher.
+The mean values seem very similar. Differences - The simulated data
+appears to have a less wide range throughout the first half, but a wider
+range throughout the second half. There are various points where one
+spikes more than the other.
 
 ### **q5** You have access to a few other variables. Construct a few visualizations of `VelocityVacuum` against these other factors. Are there other patterns in the data that might help explain the difference between Michelson’s estimate and `LIGHTSPEED_VACUUM`?
 
@@ -363,6 +365,9 @@ df_q2 %>%
   increases, but looking at the data points as well there isn’t much of
   a consistent pattern. Distinctness 2 and 3 look most similar in terms
   of measured velocity
+- Considering the two plots above, there do not appear to be any
+  patterns in the data that would explain the difference between the
+  true value and Michelson’s estiamte
 
 ## Bibliography
 
