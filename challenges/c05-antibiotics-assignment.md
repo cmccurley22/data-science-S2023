@@ -160,13 +160,26 @@ df_antibiotics_long <-
     names_to = "drug",
     values_to = "MIC"
   ) 
+glimpse(df_antibiotics_long)
+```
 
+    ## Rows: 48
+    ## Columns: 4
+    ## $ bacteria <chr> "Aerobacter aerogenes", "Aerobacter aerogenes", "Aerobacter a…
+    ## $ gram     <chr> "negative", "negative", "negative", "negative", "negative", "…
+    ## $ drug     <chr> "penicillin", "streptomycin", "neomycin", "penicillin", "stre…
+    ## $ MIC      <dbl> 870.000, 1.000, 1.600, 1.000, 2.000, 0.020, 0.001, 0.010, 0.0…
+
+``` r
 df_antibiotics_long %>%
-  ggplot(aes(MIC, bacteria)) +
+  ggplot(aes(bacteria, MIC)) +
   geom_point(
-    mapping = aes(shape = gram, color = drug)
+    mapping = aes(shape = gram, color = drug),
+    size = 3,
+    position = position_dodge(width = 0.5)
   ) +
-  scale_x_log10()
+  scale_y_log10() +
+  coord_flip()
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.1-1.png)<!-- -->
@@ -225,11 +238,12 @@ Note that your visual must be *qualitatively different* from *all* of
 your other visuals.
 
 ``` r
-df_antibiotics_long %>%
-  ggplot(aes(MIC, drug)) +
-  geom_point(aes(color = drug)) +
-  scale_x_log10() +
-  facet_wrap(vars(bacteria))
+df_antibiotics %>% 
+  ggplot(aes(bacteria, neomycin)) +
+  geom_bar(aes(fill = gram), stat = "identity", width = .75) +
+  geom_hline(yintercept = 1) +
+  scale_y_log10() +
+  coord_flip()
 ```
 
 ![](c05-antibiotics-assignment_files/figure-gfm/q1.4-1.png)<!-- -->
@@ -301,15 +315,17 @@ and in 1984 *Streptococcus fecalis* was renamed *Enterococcus fecalis*
 > Why was *Diplococcus pneumoniae* was renamed *Streptococcus
 > pneumoniae*?
 
-*Observations* - What is your response to the question above? - The
-effectiveness of the 3 drugs against this bacteria looked similar to the
-effectiveness of the drugs against other streptococcus bacteria - Which
-of your visuals above (1 through 5) is **most effective** at helping to
-answer this question? - Plot 1 - Why? - I could easily identify the
-names of the bacteria and look for other ones named streptococcus, and I
-found it easy to see the points for the three different drugs with them
-being color coded - I think that plot 5 was also helpful but honestly is
-harder to follow
+*Observations* - What is your response to the question above? - The MIC
+values for the three drugs against this bacteria were similar to those
+of Streptococcus pneumoniae. MIC values are reflective of the biological
+structure of the bacteria, so similar MIC values could be related to
+similar biological structure, which would be a good reason to rename the
+bacterium. - Which of your visuals above (1 through 5) is **most
+effective** at helping to answer this question? - Plot 1 - Why? - I
+could easily identify the names of the bacteria and look for other ones
+named streptococcus, and I found it easy to see the points for the three
+different drugs with them being color coded - I think that plot 5 was
+also helpful but honestly is harder to follow
 
 # References
 
