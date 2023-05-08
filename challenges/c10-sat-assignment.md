@@ -276,6 +276,9 @@ df_comp_long %>%
   - as both_SAT increases, univ_GPA increases
 - What relationship do `univ_GPA` and `high_GPA` exhibit?
   - same as above -\> as high_GPA increases, univ_GPA increases
+  - it seems like a more linear increase, whereas with both_SAT there
+    seems to be very steep increase towards the start then it becomes
+    closer in slope to univ_GPA
 
 ### Hypothesis Testing with a Correlation Coefficient
 
@@ -387,45 +390,30 @@ Finally, let’s use the bootstrap to perform the same test using
 ### **q5** Use the bootstrap to approximate a confidence interval for `corr[high_GPA, univ_GPA`. Compare your results—both the estimate and confidence interval—to your results from q4.
 
 ``` r
-confidence_interval <- function(col) {
-  col_mean <- mean(col)
+corr_high_GPA <- function(split) {
+  dat <- analysis(split)
   tibble(
-    int_lo = col_mean + qnorm(0.005) * (sd(col) / sqrt(length(col))),
-    int_hi = col_mean + qnorm(0.995) * (sd(col) / sqrt(length(col))),
+    term = "cor",
+    estimate = cor(dat$high_GPA, dat$univ_GPA, method = "spearman")
   )
 }
 
-df_composite %>% 
-  bootstraps(times = 1000) %>% 
-  mutate(
-    estimates = map_dfr(splits,
-                    ~ analysis(.x) %>% summarize(
-                      corr_gpa = cor.test(high_GPA, univ_GPA)$estimate,
-                      corr_sat = cor.test(both_SAT, univ_GPA)$estimate,
-                    ))
-  ) %>%
-  summarize(
-    corr_gpa = estimates %>% pull(corr_gpa),
-    corr_sat = estimates %>% pull(corr_sat)
-  ) %>%
-  summarize(
-    interval_gpa = confidence_interval(corr_gpa) %>%
-      rename(c(gpa_lo="int_lo", gpa_hi="int_hi")),
-    interval_sat = confidence_interval(corr_sat) %>%
-      rename(c(sat_lo="int_lo", sat_hi="int_hi"))
-  ) %>% 
-  unnest(cols = c(interval_gpa, interval_sat))
+df_composite %>%
+  bootstraps(1000) %>%
+  mutate(estimates = map(splits, corr_high_GPA)) %>%
+  int_pctl(estimates)
 ```
 
-    ## # A tibble: 1 × 4
-    ##   gpa_lo gpa_hi sat_lo sat_hi
-    ##    <dbl>  <dbl>  <dbl>  <dbl>
-    ## 1  0.778  0.785  0.684  0.691
+    ## # A tibble: 1 × 6
+    ##   term  .lower .estimate .upper .alpha .method   
+    ##   <chr>  <dbl>     <dbl>  <dbl>  <dbl> <chr>     
+    ## 1 cor    0.755     0.830  0.892   0.05 percentile
 
 **Observations**:
 
 - How does your estimate from q5 compare with your estimate from q4?
-  - it’s very similar
+  - it’s fairly similar, but the one from q5 is higher thus shows a
+    stronger correlation
 - How does your CI from q5 compare with your CI from q4?
   - it seems like a much smaller CI
 
@@ -577,15 +565,22 @@ fit_q7 %>%
     ## 2 high_GPA    0.570     0.103         5.55 0.000000396  0.299      0.842  
     ## 3 both_SAT    0.000534  0.000457      1.17 0.247       -0.000674   0.00174
 
+``` r
+mean(fit_q7$residuals^2)
+```
+
+    ## [1] 0.07866604
+
 **Observations**:
 
 - How well do these models perform, compared to the one you built in q6?
-  - these are better models when you consider both data sets
+  - the confidence interval is much larger
+  - the mean() of residuals is lower than above in q6
 - What is the confidence interval on the coefficient of `both_SAT` when
   including `high_GPA` as a predictor?? Is this coefficient
   significantly different from zero?
-  - the confidence interval is smaller, and the coefficient is still
-    significantly different from zero
+  - the confidence interval now includes zero, so it is not
+    significantly different from 0
 - How do the hypothesis test results compare with the results in q6?
   - the hypothesis test results match the results from q6
 
