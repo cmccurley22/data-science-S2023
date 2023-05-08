@@ -442,7 +442,7 @@ compare population with income.
 ## TODO: Join df_q4 and df_pop by the appropriate column
 
 df_data <-
-  left_join(df_pop, df_q4, by = c("geographic_area_name", "id"))
+  left_join(df_q4, df_pop, by = c("geographic_area_name", "id"))
 ```
 
 # Analysis
@@ -487,19 +487,15 @@ df_data %>%
 **Observations**:
 
 - Document your observations here.
-  - There appears to most often be the greatest income inequality in 5
-    and 6 person families
-  - There tends to be the least income inequality in 2 person families
-  - Counties that have the most income inequality seem like they see
-    income inequality across all family categories (looking specifically
-    at the top two countties for example)
+  - Larger families, 5 or 6 people, tend to have larger standard error
+    compared to smaller families
   - Median household income seems consistently smallest for two then
     three person families, but after that there’s not much of a clear
     trend in an increase based on family size with 4-6 person families
 - Can you confidently distinguish between household incomes in Suffolk
   county? Why or why not?
-  - Not really, the ranges are small so there’s a ton of overlap on the
-    plot
+  - No, the confidence intervals for each median overlap, thus the
+    estimated medians are statistically indistinguishable
 - Which counties have the widest confidence intervals?
   - Nantucket and Dukes both have wide confidence intervals
 
@@ -527,7 +523,11 @@ df_data %>%
 
 - What *overall* trend do you see between `SE` and population? Why might
   this trend exist?
-  - As population increases, SE decreases
+  - counties with a smaller population tend to have a higher standard
+    error -\> there are fewer people in counties with a smaller
+    population, which may result in a smaller sample size (for example,
+    if the samples are proportional to the target population) and thus a
+    higher standard error
 - What does this *overall* trend tell you about the relative ease of
   studying small vs large counties?
   - Larger counties will have larger sample sizes, allowing you to have
