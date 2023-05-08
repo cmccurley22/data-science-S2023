@@ -194,9 +194,15 @@ To check your results, this is Table `B01003`.
 
 ``` r
 ## TASK: Load the census bureau data with the following tibble name.
-f <- "./data/covid_data.csv"
+f <- "./data/pop_data.csv"
 
-df_pop <- read_csv(f, skip = 1, na = "*****", col_types = "ccd_d__", col_names = c("id", "Geographic Area Name", "Estimate!!Total", "Margin of Error!!Total"))
+df_pop <- read_csv(f, skip = 1,
+                   na = "*****",
+                   col_types = "ccd_d__", 
+                   col_names = c("id",
+                                 "Geographic Area Name",
+                                 "Estimate!!Total",
+                                 "Margin of Error!!Total"))
 ```
 
     ## Warning: One or more parsing issues, call `problems()` on your data frame for details,
@@ -334,7 +340,7 @@ print("Very good!")
 
 ``` r
 ## TASK: Join df_covid and df_q3 by fips.
-df_q4 <- inner_join(df_q3, df_covid, by = "fips")
+df_q4 <- left_join(df_covid, df_q3, by = "fips")
 ```
 
 For convenience, I down-select some columns and produce more convenient
@@ -441,56 +447,86 @@ Before turning you loose, let’s complete a couple guided EDA tasks.
 ``` r
 ## TASK: Compute mean and sd for cases_per100k and deaths_per100k
 df_normalized %>%
+  filter(date == lubridate::ymd("2020-05-13") |
+         date == lubridate::ymd("2021-05-13") |
+         date == lubridate::ymd("2022-05-13")) %>% 
+  group_by(date) %>% 
   summarize(
-    mean_cases_per100k = mean(cases_per100k),
-    sd_cases_per100k = sd(cases_per100k),
+    mean_cases_per100k = mean(cases_per100k, na.rm = TRUE),
+    sd_cases_per100k = sd(cases_per100k, na.rm = TRUE),
     mean_deaths_per100k = mean(deaths_per100k, na.rm = TRUE),
     sd_deaths_per100k = sd(deaths_per100k, na.rm = TRUE)
   )
 ```
 
-    ## # A tibble: 1 × 4
-    ##   mean_cases_per100k sd_cases_per100k mean_deaths_per100k sd_deaths_per100k
-    ##                <dbl>            <dbl>               <dbl>             <dbl>
-    ## 1              9975.            8449.                174.              159.
+    ## # A tibble: 3 × 5
+    ##   date       mean_cases_per100k sd_cases_per100k mean_deaths_per100k sd_deaths…¹
+    ##   <date>                  <dbl>            <dbl>               <dbl>       <dbl>
+    ## 1 2020-05-13               234.             512.                9.86        22.1
+    ## 2 2021-05-13              9921.            3069.              198.         111. 
+    ## 3 2022-05-13             24774.            6233.              375.         160. 
+    ## # … with abbreviated variable name ¹​sd_deaths_per100k
 
 ### **q7** Find the top 10 counties in terms of `cases_per100k`, and the top 10 in terms of `deaths_per100k`. Report the population of each county along with the per-100,000 counts. Compare the counts against the mean values you found in q6. Note any observations.
 
 ``` r
 ## TASK: Find the top 10 max cases_per100k counties; report populations as well
-df_cases_top10 <-
+df_cases_top10 <- 
   df_normalized %>%
-  group_by(county) %>%
-  summarise(across(c(cases_per100k, population), mean)) %>%
-  arrange(desc(cases_per100k)) %>%
-  slice(0:10)
+    arrange(desc(cases_per100k)) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(desc(cases_per100k)) %>%
+    select(fips, county, state, population, cases_per100k, date) %>% 
+    head(10)
 
-glimpse(df_cases_top10)
+df_cases_top10
 ```
 
-    ## Rows: 10
-    ## Columns: 3
-    ## $ county        <chr> "Loving", "Chattahoochee", "Crowley", "Trousdale", "Bent…
-    ## $ cases_per100k <dbl> 38233.49, 33881.41, 29040.58, 25870.58, 21433.74, 21279.…
-    ## $ population    <dbl> 102, 10767, 5630, 9573, 5809, 10663, 18040, 5486, 8198, …
+    ## # A tibble: 10 × 6
+    ## # Groups:   fips [10]
+    ##    fips  county                   state        population cases_per…¹ date      
+    ##    <chr> <chr>                    <chr>             <dbl>       <dbl> <date>    
+    ##  1 48301 Loving                   Texas               102     192157. 2022-05-12
+    ##  2 13053 Chattahoochee            Georgia           10767      69527. 2022-05-11
+    ##  3 02180 Nome Census Area         Alaska             9925      62922. 2022-05-11
+    ##  4 02188 Northwest Arctic Borough Alaska             7734      62542. 2022-05-11
+    ##  5 08025 Crowley                  Colorado           5630      59449. 2022-05-13
+    ##  6 02050 Bethel Census Area       Alaska            18040      57439. 2022-05-11
+    ##  7 46041 Dewey                    South Dakota       5779      54317. 2022-03-30
+    ##  8 48127 Dimmit                   Texas             10663      54019. 2022-05-12
+    ##  9 48247 Jim Hogg                 Texas              5282      50133. 2022-05-12
+    ## 10 02158 Kusilvak Census Area     Alaska             8198      49817. 2022-05-11
+    ## # … with abbreviated variable name ¹​cases_per100k
 
 ``` r
 ## TASK: Find the top 10 deaths_per100k counties; report populations as well
-df_deaths_top10 <-
+df_deaths_top10 <- 
   df_normalized %>%
-  group_by(county) %>%
-  summarise(across(c(deaths_per100k, population), mean)) %>%
-  arrange(desc(deaths_per100k)) %>%
-  slice(0:10)
+    arrange(desc(deaths_per100k)) %>% 
+    group_by(fips) %>%
+    slice(1) %>% 
+    arrange(desc(deaths_per100k)) %>% 
+    select(fips, county, state, population, deaths_per100k, date) %>% 
+    head(10)
 
-glimpse(df_deaths_top10)
+df_deaths_top10
 ```
 
-    ## Rows: 10
-    ## Columns: 3
-    ## $ county         <chr> "McMullen", "Galax city", "Emporia city", "Jerauld", "G…
-    ## $ deaths_per100k <dbl> 728.8689, 665.6386, 633.3231, 631.0459, 594.9208, 557.5…
-    ## $ population     <dbl> 662, 6638, 5381, 2029, 2619, 4201, 4970, 1408, 72849, 1…
+    ## # A tibble: 10 × 6
+    ## # Groups:   fips [10]
+    ##    fips  county            state        population deaths_per100k date      
+    ##    <chr> <chr>             <chr>             <dbl>          <dbl> <date>    
+    ##  1 48311 McMullen          Texas               662          1360. 2022-02-19
+    ##  2 51640 Galax city        Virginia           6638          1175. 2022-04-27
+    ##  3 48345 Motley            Texas              1156          1125. 2022-03-10
+    ##  4 13141 Hancock           Georgia            8535          1054. 2022-04-20
+    ##  5 51595 Emporia city      Virginia           5381          1022. 2022-04-19
+    ##  6 13281 Towns             Georgia           11417          1016. 2022-04-27
+    ##  7 46073 Jerauld           South Dakota       2029           986. 2022-02-14
+    ##  8 48301 Loving            Texas               102           980. 2022-03-04
+    ##  9 21201 Robertson         Kentucky           2143           980. 2022-02-03
+    ## 10 51690 Martinsville city Virginia          13101           946. 2022-05-05
 
 **Observations**:
 
@@ -499,6 +535,9 @@ glimpse(df_deaths_top10)
   reported a higher number of covid cases than number of people
 - In general, all of these values are much higher than the mean values
   for both cases and deaths
+- This is true in comparison to the mean values for three different
+  dates at different times (start vs middle vs end) of the pandemic
+  (shown in q6)
 - With the exception of McKinley, these places all seem to have
   relatively small population sizes (72k in Mckinley vs \<21k in the
   others)
@@ -532,6 +571,9 @@ df_normalized %>%
   geom_line()
 ```
 
+    ## Warning in county == df_cases_top10$county: longer object length is not a
+    ## multiple of shorter object length
+
 ![](c06-covid19-assignment_files/figure-gfm/unnamed-chunk-1-1.png)<!-- --> -
 Loving, TX is way ahead in cases per 100k, and also has a really sudden
 spike which is interesting to see - The rest of the counties rise at
@@ -545,6 +587,9 @@ df_normalized %>%
   ggplot(aes(date, deaths_per100k, color = county)) +
   geom_line()
 ```
+
+    ## Warning in county == df_cases_top10$county: longer object length is not a
+    ## multiple of shorter object length
 
 ![](c06-covid19-assignment_files/figure-gfm/unnamed-chunk-2-1.png)<!-- --> -
 At first, I was trying to figure out how there was such a sudden spike
@@ -602,6 +647,8 @@ df_normalized %>%
 
     ## Warning: `label_number_si()` was deprecated in scales 1.2.0.
     ## ℹ Please use the `scale_cut` argument of `label_number()` instead.
+
+    ## Warning: Removed 789 rows containing missing values (`geom_line()`).
 
 ![](c06-covid19-assignment_files/figure-gfm/ma-example-1.png)<!-- -->
 
