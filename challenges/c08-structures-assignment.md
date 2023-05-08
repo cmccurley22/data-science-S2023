@@ -335,7 +335,7 @@ df_norm_sim <-
 
     ## Rows: 10,000
     ## Columns: 1
-    ## $ strength <dbl> 39414.90, 40460.35, 39671.98, 40011.89, 40129.94, 40433.55, 3…
+    ## $ strength <dbl> 40003.90, 40417.99, 39977.50, 40119.81, 39464.28, 40028.75, 4…
 
 ``` r
 ## NOTE: The following code estimates the POF and a 95% confidence interval
@@ -358,28 +358,29 @@ df_norm_pof
     ## # A tibble: 1 × 3
     ##   pof_lo pof_est pof_hi
     ##    <dbl>   <dbl>  <dbl>
-    ## 1 0.0148  0.0174 0.0200
+    ## 1 0.0155  0.0181 0.0207
 
 - Assuming your scopus is the probability of failure `POF` defined
   above, does your estimate exhibit real variability, induced
   variability, or both?
-  - There is real variability from us generating the data and induced
-    variability in the process of obtaining the POF
+  - There is no real variability, but there is induced variability in
+    the process of obtaining the POF
 - Does this confidence interval imply that `POF < 0.03`?
-  - (Your response here)
+  - Yes because the high estimate, .022, is still less than .03
 - Compare this probability with your estimate from q2; is it more or
   less trustworthy?
   - Yes, all estimates including the pof_hi estimate are less than .03
 - Does the confidence interval above account for uncertainty arising
   from the *Monte Carlo approximation*? Why or why not?
-  - No because the confidence intervals and POF are able to vary with
-    different Monte Carlo approximations
+  - Yes it does - the standard error is based on the montecarlo sample
+    size
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
-  - I think it is an improvement to some extent, but it doesn’t change
-    the fact that you’re working from only 25 actual physical samples
+  - Yes, it does. I think it is an improvement to some extent, but it
+    doesn’t change the fact that you’re working from only 25 actual
+    physical samples
 - What could you do to tighten up the confidence interval?
-  - Collecting more physical measurements
+  - Use the montecarlo approximation to generate more values
 - Can you *confidently* conclude that `POF < 0.03`? Why or why not?
   - No, there is still too much uncertainty
 
@@ -489,9 +490,9 @@ df_samples %>%
 ```
 
     ## # A tibble: 1 × 6
-    ##   term   .lower .estimate .upper .alpha .method   
-    ##   <chr>   <dbl>     <dbl>  <dbl>  <dbl> <chr>     
-    ## 1 pof   0.00100    0.0174 0.0458   0.05 percentile
+    ##   term    .lower .estimate .upper .alpha .method   
+    ##   <chr>    <dbl>     <dbl>  <dbl>  <dbl> <chr>     
+    ## 1 pof   0.000980    0.0175 0.0505   0.05 percentile
 
 **Observations**:
 
@@ -500,8 +501,8 @@ df_samples %>%
   - It takes 1000 samples which tries to counter that uncertainty
 - Does the confidence interval above account for uncertainty arising
   from *limited physical tests* (`df_samples`)? Why or why not?
-  - No, the bootstrap estimate doesn’t specifically consider uncertainty
-    due to having very few physical data points
+  - Yes, the bootstrap specifically quantifies uncertainty arising from
+    limited physical tests
 - Can you confidently conclude that `POF < 0.03`? Why or why not?
   - Still no, there is still too much uncertainty that isn’t accounted
     for
